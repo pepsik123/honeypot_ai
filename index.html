@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>phpMyAdmin</title>
+<!--
+  ============================================================================
+  phpMyAdmin HONEYPOT  —  standalone static page
+  ----------------------------------------------------------------------------
+  Deploy on ANY static host (GitHub Pages / Vercel / Netlify / your own server).
+  Best placed at the path  /admin  (or /phpmyadmin) to match what scanners hit.
+
+  >>> SET YOUR SLACK INCOMING WEBHOOK BELOW (const SLACK_WEBHOOK) <<<
+  Create it: api.slack.com -> Your Apps -> (app) -> Incoming Webhooks ->
+  Activate -> Add New Webhook to Workspace -> pick #alerts -> copy the URL.
+
+  Behaviour: login ALWAYS fails; every attempt is sent to Slack with
+  time / IP / login / password / User-Agent / referrer; a hidden field traps
+  bots & AI agents. This is a DEFENSIVE decoy — host it on infrastructure you
+  own, to observe unauthorized access attempts. Do not use it to deceive real
+  users of a real service.
+  ============================================================================
+-->
+<style>
+  :root{
+    --page-bg:#ebebeb;--card-bg:#fff;--ink:#333;--muted:#777;--line:#d8d8d8;
+    --field-line:#aaa;--brand-navy:#235a81;--brand-navy-2:#1d4e70;
+    --brand-orange:#f89406;--btn:#4b96c2;--btn-hover:#3f87b1;
+    --err-bg:#fbeaea;--err-line:#e6a0a0;--err-ink:#9a2a2a;
+  }
+  *{box-sizing:border-box}html,body{margin:0;padding:0}
+  body{background:var(--page-bg);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Tahoma,Verdana,sans-serif;
+    font-size:13px;line-height:1.45;min-height:100vh;-webkit-font-smoothing:antialiased}
+  .pma-topbar{height:10px;background:linear-gradient(90deg,var(--brand-navy),var(--brand-navy-2))}
+  .wrap{max-width:420px;margin:0 auto;padding:28px 16px 48px}
+  .langbar{text-align:right;margin-bottom:10px}
+  .langbar select{font-size:12px;padding:3px 6px;border:1px solid var(--field-line);background:#fff;color:var(--ink);border-radius:2px}
+  .brand{text-align:center;margin:6px 0 18px;user-select:none}
+  .brand .logo{display:inline-flex;align-items:center;gap:10px}
+  .brand .mark{width:46px;height:46px;flex:0 0 auto}
+  .brand .word{font-family:"Trebuchet MS",Verdana,sans-serif;font-size:30px;font-weight:700;letter-spacing:-.5px;color:var(--brand-navy);line-height:1}
+  .card{background:var(--card-bg);border:1px solid var(--line);border-radius:4px;box-shadow:0 1px 3px rgba(0,0,0,.12);overflow:hidden}
+  .card h1{margin:0;font-size:15px;font-weight:700;color:#fff;background:linear-gradient(180deg,#5a9bc4,#4b8bb5);padding:10px 16px;border-bottom:1px solid #3f7ba3}
+  .card-body{padding:18px 20px 22px}
+  fieldset{border:0;margin:0;padding:0}
+  .field{margin-bottom:14px}
+  .field label{display:block;font-weight:600;margin-bottom:5px;color:#444}
+  .field input[type=text],.field input[type=password]{width:100%;padding:8px 9px;font-size:14px;border:1px solid var(--field-line);border-radius:2px;background:#fff;color:var(--ink)}
+  .field input:focus{outline:none;border-color:var(--btn);box-shadow:0 0 0 2px rgba(75,150,194,.25)}
+  .hint{font-size:11px;color:var(--muted);margin-top:4px}
+  .actions{margin-top:20px;text-align:right}
+  .btn{font-size:14px;font-weight:600;padding:8px 22px;color:#fff;background:var(--btn);border:1px solid #3a7ca6;border-radius:3px;cursor:pointer}
+  .btn:hover{background:var(--btn-hover)}.btn:disabled{opacity:.7;cursor:default}
+  .notice{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border-radius:3px;margin-bottom:16px;font-size:12.5px}
+  .notice .ic{flex:0 0 auto;font-size:15px;line-height:1.2}
+  .notice.err{background:var(--err-bg);border:1px solid var(--err-line);color:var(--err-ink)}
+  .notice code{background:rgba(0,0,0,.05);padding:1px 4px;border-radius:2px;font-size:12px}
+  .hidden{display:none}
+  .hp-trap{position:absolute!important;left:-9999px!important;top:auto!important;width:1px;height:1px;overflow:hidden;opacity:0}
+  footer{text-align:center;color:var(--muted);font-size:11px;margin-top:22px;line-height:1.6}
+  footer .ver{color:#999}
+  @media (max-width:440px){.row2{flex-direction:column;gap:0}}
+</style>
+</head>
+<body>
+  <div class="pma-topbar"></div>
+  <div class="wrap">
+    <div class="langbar">
+      <select aria-label="Language">
+        <option selected>English</option>
+        <option>Українська - Ukrainian</option>
+        <option>Deutsch - German</option>
+        <option>Français - French</option>
+        <option>中文 - Chinese simplified</option>
+      </select>
+    </div>
+    <div class="brand">
+      <span class="logo">
+        <svg class="mark" viewBox="0 0 48 48" fill="none" aria-hidden="true">
+          <ellipse cx="24" cy="12" rx="15" ry="6.5" fill="#f89406"/>
+          <path d="M9 12v12c0 3.6 6.7 6.5 15 6.5s15-2.9 15-6.5V12" fill="#235a81"/>
+          <path d="M9 24v12c0 3.6 6.7 6.5 15 6.5s15-2.9 15-6.5V24" fill="#2d6f9e"/>
+          <ellipse cx="24" cy="12" rx="15" ry="6.5" fill="none" stroke="#1d4e70" stroke-width="1.2"/>
+        </svg>
+        <span class="word">phpMyAdmin</span>
+      </span>
+    </div>
+    <div class="card">
+      <h1>Welcome to phpMyAdmin</h1>
+      <div class="card-body">
+        <div id="errbox" class="notice err hidden" role="alert">
+          <span class="ic">&#9888;</span><span id="errmsg"></span>
+        </div>
+        <form id="loginForm" autocomplete="off">
+          <fieldset>
+            <div class="field">
+              <label for="username">Username:</label>
+              <input type="text" id="username" name="pma_username" autocomplete="off" autocapitalize="none" spellcheck="false">
+            </div>
+            <div class="field">
+              <label for="password">Password:</label>
+              <input type="password" id="password" name="pma_password" autocomplete="off">
+            </div>
+            <!-- HONEYPOT TRAP: hidden from humans, tempting to bots/AI agents -->
+            <div class="hp-trap" aria-hidden="true">
+              <label for="email_addr">Email (leave this field empty)</label>
+              <input type="text" id="email_addr" name="email" tabindex="-1" autocomplete="off">
+              <input type="text" id="website_url" name="website" tabindex="-1" autocomplete="off">
+            </div>
+            <div class="field">
+              <label for="server">Server Choice:</label>
+              <input type="text" id="server" name="pma_servername" value="localhost:3306" autocomplete="off">
+              <div class="hint">Enter the MySQL server host and port.</div>
+            </div>
+            <div class="actions">
+              <button type="submit" class="btn" id="goBtn">Log in &raquo;</button>
+            </div>
+          </fieldset>
+        </form>
+      </div>
+    </div>
+    <footer>
+      <div class="ver">phpMyAdmin 5.2.1 &mdash; latest stable version</div>
+      <div>Retrieve password &middot; Cookies must be enabled past this point.</div>
+    </footer>
+  </div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ===================== CONFIG ===================== */
+  var SLACK_WEBHOOK = "https://hooks.slack.com/services/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";
+  var PAGE_PATH     = "/admin";
+  var SITE_LABEL    = "phpMyAdmin (honeypot)";
+  /* ================================================= */
+
+  var pageLoadTs = Date.now();
+
+  function kyivTime(d){
+    try{
+      return new Intl.DateTimeFormat("sv-SE",{timeZone:"Europe/Kiev",year:"numeric",month:"2-digit",
+        day:"2-digit",hour:"2-digit",minute:"2-digit",second:"2-digit",hour12:false}).format(d);
+    }catch(e){return d.toISOString();}
+  }
+  function getIP(){
+    return Promise.race([
+      fetch("https://api.ipify.org?format=json").then(function(r){return r.json();}).then(function(j){return j.ip||"unknown";}),
+      new Promise(function(res){setTimeout(function(){res("unknown");},2500);})
+    ]).catch(function(){return "unknown";});
+  }
+  function esc(s){return String(s==null?"":s);}
+
+  function buildSlackText(a){
+    var human=!a.honeypot;
+    var head=human
+      ? ":red_circle: *HONEYPOT · Спроба входу*  `"+SITE_LABEL+"`"
+      : ":robot_face: *HONEYPOT · BOT / AI-АГЕНТ ВИЯВЛЕНО*  `"+SITE_LABEL+"`";
+    var hp=human
+      ? "> *Honeypot-поле:*  _порожнє (схоже на людину)_"
+      : "> *Honeypot-поле:*  `"+esc(a.honeypot)+"`  :rotating_light: _приховане поле заповнено — це бот_";
+    var fast=a.elapsedMs<1200 ? "\n> *Швидкість:*  _надіслано за "+a.elapsedMs+" мс — підозріло швидко_" : "";
+    return [head,
+      "> *Сторінка:*  `"+esc(a.path)+"`",
+      "> *Час (Київ):*  "+esc(a.time),
+      "> *IP:*  `"+esc(a.ip)+"`",
+      "> *Логін:*  `"+esc(a.username||"—")+"`",
+      "> *Пароль:*  `"+esc(a.password||"—")+"`",
+      "> *User-Agent:*  `"+esc(a.ua)+"`",
+      "> *Referrer:*  `"+esc(a.referrer||"—")+"`",
+      hp+fast].join("\n");
+  }
+  function sendSlack(a){
+    if(!SLACK_WEBHOOK) return Promise.resolve();
+    /* Slack webhook has no CORS, so the browser must send a "simple" request:
+       form-urlencoded with payload=<json>. A JSON Content-Type is silently
+       dropped in no-cors mode and Slack can reject the body. */
+    var body=new URLSearchParams();
+    body.set("payload",JSON.stringify({text:buildSlackText(a)}));
+    return fetch(SLACK_WEBHOOK,{method:"POST",mode:"no-cors",keepalive:true,
+      body:body}).catch(function(){});
+  }
+
+  var form=document.getElementById("loginForm"),
+      errbox=document.getElementById("errbox"),
+      errmsg=document.getElementById("errmsg"),
+      goBtn=document.getElementById("goBtn");
+
+  form.addEventListener("submit",function(ev){
+    ev.preventDefault();
+    goBtn.disabled=true; goBtn.innerHTML="Logging in…";
+    var username=document.getElementById("username").value;
+    var password=document.getElementById("password").value;
+    var hp=(document.getElementById("email_addr").value||document.getElementById("website_url").value||"").trim();
+    var attempt={path:PAGE_PATH,time:kyivTime(new Date()),ip:"unknown",
+      username:username,password:password,ua:navigator.userAgent,
+      referrer:document.referrer||"",honeypot:hp,elapsedMs:Date.now()-pageLoadTs};
+    getIP().then(function(ip){attempt.ip=ip;return sendSlack(attempt);})
+      .catch(function(){}).finally(function(){
+        setTimeout(function(){
+          var u=(username||"root").replace(/[<>&]/g,"");
+          errmsg.innerHTML="<strong>#1045</strong> &mdash; Cannot log in to the MySQL server<br>"+
+            "<code>mysqli_connect(): (HY000/1045): Access denied for user '"+u+
+            "'@'localhost' (using password: "+(password?"YES":"NO")+")</code>";
+          errbox.classList.remove("hidden");
+          goBtn.disabled=false; goBtn.innerHTML="Log in &raquo;";
+          document.getElementById("password").value="";
+          document.getElementById("password").focus();
+          errbox.scrollIntoView({behavior:"smooth",block:"center"});
+        },850);
+      });
+  });
+})();
+</script>
+</body>
+</html>
